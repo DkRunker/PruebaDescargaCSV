@@ -1,0 +1,5 @@
+<root>
+    <item name='android.util.Log int wtf(java.lang.String, java.lang.String, java.lang.Throwable)'>
+        <annotation name='java.lang.Deprecated' />
+    </item>
+</root>
