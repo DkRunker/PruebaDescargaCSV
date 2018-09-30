@@ -14,9 +14,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class ListaCentros extends AppCompatActivity {
 
@@ -62,7 +67,93 @@ public class ListaCentros extends AppCompatActivity {
 
     private List<CentroMedico> listaCentros = new ArrayList<CentroMedico>();
     private void leeFicheroCSV(){
-        InputStream is = getResources().openRawResource(R.raw.registro_de_centros_sanitarios_de_castilla_y_le_n);
+        //Abrir un hilo nuevo para descargar la información
+        new Thread(){
+            @Override
+            public  void run() {
+                String path = "https://datosabiertos.jcyl.es/web/jcyl/risp/es/salud/centros_sanitarios/1284289592598.csv";
+                URL u = null;
+                try {
+                    u = new URL(path);
+                    HttpsURLConnection c = (HttpsURLConnection) u.openConnection();
+                    c.setRequestMethod("GET");
+                    c.connect();
+                    InputStream is = c.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+
+                    String line = "";
+                    reader.readLine();
+                    while ((line = reader.readLine()) != null) {
+                        if (line.contains(";")) {
+                            //Separar por ;
+                            String[] elementos = line.split(";");
+
+                            //Tratar la linea de informacion
+                            CentroMedico centro = new CentroMedico();
+                            if (elementos.length >= 12 && elementos[0] != null)
+                                centro.setNombre(elementos[0]);
+                            else
+                                centro.setNombre("");
+                            if (elementos.length >= 12 && elementos[1] != null)
+                                centro.setNumRegistro(elementos[1]);
+                            else
+                                centro.setNumRegistro("");
+                            if (elementos.length >= 12 && elementos[2] != null)
+                                centro.setDireccion(elementos[2]);
+                            else
+                                centro.setDireccion("");
+                            if (elementos.length >= 12 && elementos[3] != null)
+                                centro.setCodPostal(elementos[3]);
+                            else
+                                centro.setCodPostal("");
+                            if (elementos.length >= 12 && elementos[4] != null)
+                                centro.setLocalidad(elementos[4]);
+                            else
+                                centro.setLocalidad("");
+                            if (elementos.length >= 12 && elementos[5] != null)
+                                centro.setProvincia(elementos[5]);
+                            else
+                                centro.setProvincia("");
+                            if (elementos.length >= 12 && elementos[6] != null)
+                                centro.setTelefono(elementos[6]);
+                            else
+                                centro.setTelefono("");
+                            if (elementos.length >= 12 && elementos[7] != null)
+                                centro.setFax(elementos[7]);
+                            else
+                                centro.setFax("");
+                            if (elementos.length >= 12 && elementos[8] != null)
+                                centro.setTipoCentro(elementos[8]);
+                            else
+                                centro.setTipoCentro("");
+                            if (elementos.length >= 12 && elementos[9] != null)
+                                centro.setFinalidadAsistencial(elementos[9]);
+                            else
+                                centro.setFinalidadAsistencial("");
+                            if (elementos.length >= 12 && elementos[10] != null)
+                                centro.setTitularidad(elementos[10]);
+                            else
+                                centro.setTitularidad("");
+                            if (elementos.length >= 12 && elementos[11] != null)
+                                centro.setDependenciaFuncional(elementos[11]);
+                            else
+                                centro.setDependenciaFuncional("");
+                            listaCentros.add(centro);
+
+                            Log.d("MyActivity", "Centro: " + centro);
+                        }
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (ProtocolException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+
+        /*InputStream is = getResources().openRawResource(R.raw.registro_de_centros_sanitarios_de_castilla_y_le_n);
         BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
 
         String line = "";
@@ -131,7 +222,7 @@ public class ListaCentros extends AppCompatActivity {
         } catch (IOException e) {
             Log.wtf("MyActivity", "Error leyendo el fichero en la línea " + line, e);
             e.printStackTrace();
-        }
+        }*/
 
     }
 }
